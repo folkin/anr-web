@@ -1,0 +1,22 @@
+div 
+{
+    background-color:#ff0;
+    border:1px dashed #d77;
+}
+.row
+{
+    min-height:30px;
+}
+
+.event-log,
+.chat-log
+{
+    background-color:#48f;
+    height:100px;
+    overflow:scroll;
+}
+
+.game-table
+{
+    background-color:#2A6;
+}
