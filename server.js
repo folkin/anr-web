@@ -1,7 +1,3 @@
-
-
-var ip = process.env.IP;
-var port = process.env.PORT;
 var http = require("http");
 var connect = require("connect");
 var rest = require("connect-rest");
@@ -15,14 +11,17 @@ function run() {
         .use(connect.static(__dirname + '/content'))
         .use(connect.query())
         .use(connect.urlencoded())
-        .use(connect.json())
+        .use(connect.json({ strict: false }))
         .use(rest.rester(options));
         
-    rest.post('/games/create', database.createGame);
+    rest.get('/games', database.listGames);
+    rest.post('/games', database.createGame);
     rest.get('/games/:gameid', database.getGame);
-    rest.get('/games/:gameid/events/?version', database.getGameEventsSince);
-    rest.post('/games/:gameid/events', database.saveGameEvent);
-    rest.post('/games/:gameid/players/?player', database.joinGame);
+    rest.post('/game/:gameid/delete', database.deleteGame);
+    rest.post('/game/:gameid/end', database.endGame);
+    rest.post('/game/:gameid/join', database.joinGame);
+    rest.get('/events/:gameid/?version', database.getGameEventsSince);
+    rest.post('/events/:gameid', database.saveGameEvent);
     
     http.createServer(app).listen(process.env.PORT, process.env.IP);
 }
