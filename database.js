@@ -1,5 +1,6 @@
 function createGame(request, content, callback) {
     console.log("->createGame");
+    logRequest(request, content);
     module._crypto.randomBytes(8, function(ex, buf) {
         var gameid = buf.toString('hex');
         var name = content.name;
@@ -7,101 +8,121 @@ function createGame(request, content, callback) {
         var now = new Date().toJSON();
         var game = { 
             'id': gameid, 
-            'created': now, 
+            'created': now,
+            'ended': null, 
             'name': name, 
-            'password': password, 
-            'isComplete': false,  
+            'password': password,   
             'players': [], 
             'events': [] 
         };
         module._games.insert(game, function(err, result) {
+            logQuery(err, result);
             if (err) {
                 callback(err);
             }
             else {
                 callback(null, {'gameid': gameid});
             }
+            console.log("<-createGame");
         });
     });
 }
 
 function endGame(request, content, callback) {
     console.log("->endGame");
+    logRequest(request, content);
     var gameid = request.parameters.gameid;
     var now = new Date().toJSON();
-    module._games.update({ id: gameid }, { '$set': { isComplete: true, completed: now } }, function(err, result) {
+    module._games.update({ id: gameid }, { '$set': { 'ended': now } }, function(err, result) {
+        logQuery(err, result);
         if (err) {
             callback(err);
         }
         else {
-            callback(null, {'gameid': gameid});
+            callback(null, { 'gameid': gameid });
         }
+        console.log("<-endGame");
     });
 }
 
 function deleteGame(request, content, callback) {
     console.log("->deleteGame");
+    logRequest(request, content);
     var gameid = request.parameters.gameid;
     module._games.remove({ id: gameid }, function(err, result) {
+        logQuery(err, result);
         if (err) {
             callback(err);
         }
         else {
-            callback(null);
+            callback(result);
         }
+        console.log("<-deleteGame");
     });
 }
 
 function joinGame(request, content, callback) {
     console.log("->joinGame");
+    logRequest(request, content);
     var gameid = request.parameters.gameid;
     var name = content.name;
     var type = content.player || 's';
-    var password = content.password;
     module._crypto.randomBytes(8, function(ex, buf) {
         var playerid = buf.toString('hex');
-        module._games.update({ 'id': gameid, 'password': password }, { '$push': { 'players': { 'id': playerid, 'name': name, 'type': type } } }, function(err, result) {
-            if (err) {
-                callback(err);
-            }
-            else {
-                callback(null, {'playerid': playerid});
-            }
+        module._games.update(
+            { 'id': gameid, 'password': content.password }, 
+            { '$push': { 'players': { 'id': playerid, 'name': name, 'type': type, 'deck-url': content.deck } } }, 
+            function(err, result) {
+                logQuery(err, result);
+                if (err) {
+                    callback(err);
+                }
+                else {
+                    callback(null, { 'playerid': playerid });
+                }
+                console.log("<-joinGame");
         });
     });
 }
 
 function getGame(request, content, callback) {
     console.log("->getGame");
+    logRequest(request, content);
     var gameid = request.parameters.gameid;
     module._games.findOne({ 'id': gameid }, function(err, result) {
+        logQuery(err, result);
         if (err) {
             callback(err);
         }
         else {
             callback(null, result);
         }
+        console.log("<-getGame");
     });
 }
 
 function listGames(request, content, callback) {
     console.log("->listGames");
+    logRequest(request, content);
     module._games.aggregate(
         { $match: { isComplete: false } },
         { $sort: { created: -1 } },
         { $project: { '_id': 0, 'id': 1, 'name': 1, 'players': 1, 'protected': { $cond: [{ $eq: ['$password', null] }, false, true] } } },
         function (err, result) {
+            logQuery(err, result);
             if (err) {
                 callback(err);
             }
             else {
                 callback(null, result);
             }
+            console.log("<-listGames");
         });
 }
 
 function saveGameEvent(request, content, callback) {
     console.log("->saveGameEvent");
+    logRequest(request, content);
     var event = content.event;
     var gameid = request.parameters.gameid;
     var version = content.version;
@@ -110,20 +131,23 @@ function saveGameEvent(request, content, callback) {
         { id: gameid }, 
         {'$push': { events: event }},
         function(err, result) {
+            logQuery(err, result);
             if (err) {
                 callback(err);
             }
             else {
                 getGameEventsSince({ 'parameters': { 'gameid': gameid, 'version': version } }, null, callback);
             }
+            console.log("<-saveGameEvent");
         });
 }
 
 function getGameEventsSince(request, content, callback) {
     console.log("->getGameEventsSince");
+    logRequest(request, content);
     var version = request.parameters.version || 0;
-    getGame(request, content, function(err, result)
-    {
+    getGame(request, content, function(err, result) {
+        logQuery(err, result);
         if (err) {
             callback(err);
         }
@@ -136,7 +160,19 @@ function getGameEventsSince(request, content, callback) {
             }
             callback(null, { 'version': count, 'events': events });
         }
+        console.log("<-getGameEventsSince");
     });
+}
+
+function logRequest(request, content){
+    console.log("  request: params - " + JSON.stringify(request.parameters) + "  content - " + JSON.stringify(content));
+}
+
+function logQuery(err, result){
+    if (err)
+        console.log("  query: error - " + JSON.stringify(err));
+    if (result)
+        console.log("  query: result - " + JSON.stringify(err));
 }
 
 module._crypto = require("crypto");
