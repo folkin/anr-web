@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.js"></script>
+        <script src="//cdn.jsdelivr.net/mustache.js/0.8.1/mustache.min.js"></script>
+        
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet"></link>
+        <link href="//netdna.bootstrapcdn.com/bootswatch/3.1.1/slate/bootstrap.min.css" rel="stylesheet"></link>
+        <link href="/style.css" rel="stylesheet"></link>
+    </head>
+    
+    <body>
+    <div class="container games-container">
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="jumbotron">
+                <h1>Android NetRunner</h1>
+                <p>The simple place to play Fantasy Flight"s Android NetRunner online.</p>
+            </div>
+        </div>
+        </div>
+        
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h2>Current Active Games</h2>
+                </div>
+                <div id="games-list-alert" class="alert alert-danger hidden">
+                  <button type="button" class="close" data-dismiss="alert">×</button>
+                  <strong>Whoops -</strong> Something bad happened. Try <a class="alert-link" href="setup.html">refreshing the page</a>.
+                  <p></p>
+                </div>
+                <div class="panel-body">
+                    <ul id="games-list" class="list-group">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </div>
+        
+        <div class="row">
+        <div class="col-xs-12">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#new-game-modal">Create New Game</button>            
+        </div>
+    </div>
+    
+    <div id="new-game-modal" class="modal fade new-game">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Create a New Game</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <fieldset>
+                        <div class="form-group">
+                            <label for="new-game-name" class="col-xs-3 control-label">Name</label>
+                            <div class="col-xs-9">
+                                <input type="text" class="form-control" id="new-game-name" placeholder="name" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-game-password" class="col-xs-3 control-label">Password (optional)</label>
+                            <div class="col-xs-9">
+                                <input type="password" class="form-control" id="new-game-password" placeholder="password" autocomplete="off" />
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createGame();">Create</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="join-game-modal" class="modal fade join-game">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Join Game</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" id="join-game-id" name="join-game-id"/>
+                    <fieldset>
+                        <div class="form-group">
+                            <label for="join-game-name" class="col-xs-3 control-label">Name</label>
+                            <div class="col-xs-9">
+                                <input type="text" class="form-control" id="join-game-name" placeholder="name" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="join-game-player" class="col-xs-3 control-label">Player Type</label>
+                            <div class="col-xs-9">
+                                <select type="text" class="form-control" id="join-game-player" placeholder="name" autocomplete="off" />
+                                    <option value="c">Corporation</option>
+                                    <option value="r">Runner</option>
+                                    <option value="s">Spectator</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="join-game-password" class="col-xs-3 control-label">Password</label>
+                            <div class="col-xs-9">
+                                <input type="password" class="form-control" id="join-game-password" placeholder="password" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="join-game-deck" class="col-xs-3 control-label">Deck URL</label>
+                            <div class="col-xs-9">
+                                <textarea class="form-control" rows="8" id="join-game-deck" placeholder="deck" autocomplete="off"></textarea>
+                                <span class="help">Paste your HTML exported deck from <a href="http://netrunner.meteor.com" target="_blank">netrunner.meteor.com</a></span>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="joinGame();">Join</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    
+    <script type="text/html" id="game-template">
+        {{#games}}
+        <li class="list-group-item" style="line-height:30px" data-gameid="{{id}}" data-protected="{{protected}}">
+                {{#protected}}<span class="glyphicon glyphicon-lock"></span>&nbsp;{{/protected}}
+                <span>{{name}}</span>
+                <button type="button" class="btn btn-primary btn-sm pull-right" data-toggle="modal" data-target="#join-game-modal" onclick="prepareJoinModal(this);">Join</button>    
+            </div>
+        </li>
+        {{/games}}
+        {{^games}}
+            no games right now - create one!
+        {{/games}}
+    </script>
+    
+    <script type="text/javascript">
+        function renderGames(data) {            
+            var games = { "games": data };
+            var template = $("#game-template").html();
+            $("#games-list").html(Mustache.render(template, games));
+        }
+        
+        function renderError(error) {
+            $("#games-list-alert > p").html(error);
+            $("#games-list-alert").alert();
+        }
+    
+        function listGames() {
+            $.ajax("api/games", {
+                dataType: "json",
+                success: function(data, status, xhr) {
+                    renderGames(data);
+                },
+                error: function(xhr, status, error) {
+                    renderError(errror);
+                }
+            });
+        }
+        
+        function createGame() {
+            var data = { 
+                "name": $("#new-game-name").val(), 
+                "password": $("#new-game-password").val() 
+            };
+            
+            $("#new-game-name").closest(".form-group").toggleClass("has-error", !data.name);                        
+            if ($("#new-game-modal").find(".has-error").length > 0) {
+                return;
+            } 
+            
+            $("#new-game-modal").modal("hide");
+            
+            $.ajax("api/games/create", {
+                dataType: "json",
+                type: "post",
+                data: data,
+                success: function(data, status, xhr) {
+                    renderGames(data);
+                },
+                error: function(xhr, status, error) {
+                    renderError(errror);
+                }
+            });
+        }
+        
+        function prepareJoinModal(btn) {
+            var li = $(btn).closest("li");
+            var gameid = li.attr("data-gameid");
+            var protected = eval(li.attr("data-protected"));
+            
+            $("#join-game-id").val(gameid);
+            $("#join-game-password").closest(".form-group").toggleClass("hidden", !protected);
+        }
+        
+        function joinGame() {
+            var gameid = $("#join-game-id").val();
+            var data = { 
+                "name": $("#join-game-name").val(), 
+                "player": $("#join-game-player").val(),
+                "password": $("#join-game-password").val()
+            };
+            var deckhtml = $("#join-game-deck").val();
+            
+            $("#join-game-name").closest(".form-group").toggleClass("has-error", !data.name);
+            $("#join-game-password").closest(".form-group").toggleClass("has-error", $("#join-game-password").is(":visible") && !data.password );
+            $("#join-game-player").closest(".form-group").toggleClass("has-error", !data.player);
+            $("#join-game-deck").closest(".form-group").toggleClass("has-error", !deckhtml);            
+            if ($("#join-game-modal").find(".has-error").length > 0) {
+                return;
+            }
+            
+            data.deck = scrapeMeteorDeck(deckhtml);            
+            
+            $("#join-game-modal").modal("hide");
+            
+            $.ajax("api/game/" + gameid + "/join", {
+                dataType: "json",
+                type: "post",
+                data: data,
+                success: function(data, status, xhr) { 
+                    window.location = "game.html?id=" + gameid + "&player=" + data.playerid;
+                },
+                error: function(xhr, status, error) {
+                    renderError(errror);
+                }
+            });
+        }
+        
+        function scrapeMeteorDeck(html) {
+            var deck = null;
+            var lines = html.split("\n");
+            for (i = 0; i < html.length; i++) {
+                var line = lines[i];
+                if (line && line.indexOf("http://netrunner.meteor.com/card/") >= 0) {
+                    var link = $(line.substr(line.indexOf("<a"))).first();
+                    var name = link.text();
+                    var href = link.attr("href");
+                    var id = href.substr(href.lastIndexOf("/") + 1);
+                    if (deck == null) {
+                        deck = { "identity": { "id": id, "name": name }, "cards": [] };
+                    } else {
+                        var quantity = line.match("^[0-9]+")[0];
+                        for (j = 0; j < quantity; j++) {
+                            deck.cards.push({ "id": id, "name": name });
+                        }
+                    }
+                }
+            }
+            return deck;
+        }
+        
+        $(document).ready(function() {
+            listGames(renderGames);
+        });
+    </script>
+    </body>
+</html>

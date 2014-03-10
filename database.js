@@ -65,13 +65,15 @@ function joinGame(request, content, callback) {
     console.log("->joinGame");
     logRequest(request, content);
     var gameid = request.parameters.gameid;
+    var password = sanatize(content.password);
     var name = sanatize(content.name);
     var type = sanatize(content.player) || 's';
+    var deck = content.deck || [];
     module._crypto.randomBytes(8, function(ex, buf) {
         var playerid = buf.toString('hex');
         module._games.update(
-            { 'id': gameid, 'password': content.password }, 
-            { '$push': { 'players': { 'id': playerid, 'name': name, 'type': type, 'deck-url': content.deck } } }, 
+            { 'id': gameid, 'password': password }, 
+            { '$push': { 'players': { 'id': playerid, 'name': name, 'type': type, 'deck': deck } } }, 
             function(err, result) {
                 logQuery(err, result);
                 if (err) {
