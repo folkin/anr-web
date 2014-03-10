@@ -25,7 +25,7 @@ function run() {
     rest.get('/events/:gameid/?version', database.getGameEventsSince);
     rest.post('/events/:gameid', database.saveGameEvent);
     
-    http.createServer(app).listen(process.env.PORT, process.env.IP);
+    http.createServer(app).listen(8080);
 }
 
 

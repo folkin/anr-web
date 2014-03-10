@@ -104,9 +104,12 @@ function getGame(request, content, callback) {
 function listGames(request, content, callback) {
     console.log("->listGames");
     logRequest(request, content);
+    var d = new Date();
+    d.setHours(new Date().getHours() - 48);
+    var yesterday = d.toJSON();
     module._games.aggregate(
-        { $match: { ended: null } },
-        { $sort: { created: -1 } },
+        { $match: { 'ended': null, 'created': { $gt: yesterday } } },
+        { $sort: { 'created': -1 } },
         { $project: { '_id': 0, 'id': 1, 'name': 1, 'players': 1, 'protected': { $cond: [{ $eq: ['$password', null] }, false, true] } } },
         function (err, result) {
             logQuery(err, result);
