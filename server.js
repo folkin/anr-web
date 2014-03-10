@@ -6,7 +6,7 @@ var database = require("./database.js");
 function run() {
     var options = {
         context: '/api',
-        logger: new ConsoleLogger()
+        logger: new NullLogger()
     };
     var app = connect()
         .use(connect.static(__dirname + '/content'))
@@ -29,9 +29,9 @@ function run() {
 }
 
 
-function ConsoleLogger(){ }
-ConsoleLogger.prototype.info = function() { };
-ConsoleLogger.prototype.debug = function() { };
-ConsoleLogger.prototype.error = function() { };
+function NullLogger(){ }
+NullLogger.prototype.info = function() { };
+NullLogger.prototype.debug = function() { };
+NullLogger.prototype.error = function() { };
 
 run();

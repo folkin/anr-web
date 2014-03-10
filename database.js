@@ -3,8 +3,8 @@ function createGame(request, content, callback) {
     logRequest(request, content);
     module._crypto.randomBytes(8, function(ex, buf) {
         var gameid = buf.toString('hex');
-        var name = content.name;
-        var password = content.password;
+        var name = sanatize(content.name);
+        var password = sanatize(content.password);
         var now = new Date().toJSON();
         var game = { 
             'id': gameid, 
@@ -55,7 +55,7 @@ function deleteGame(request, content, callback) {
             callback(err);
         }
         else {
-            callback(result);
+            callback(null, result);
         }
         console.log("<-deleteGame");
     });
@@ -65,8 +65,8 @@ function joinGame(request, content, callback) {
     console.log("->joinGame");
     logRequest(request, content);
     var gameid = request.parameters.gameid;
-    var name = content.name;
-    var type = content.player || 's';
+    var name = sanatize(content.name);
+    var type = sanatize(content.player) || 's';
     module._crypto.randomBytes(8, function(ex, buf) {
         var playerid = buf.toString('hex');
         module._games.update(
@@ -105,7 +105,7 @@ function listGames(request, content, callback) {
     console.log("->listGames");
     logRequest(request, content);
     module._games.aggregate(
-        { $match: { isComplete: false } },
+        { $match: { ended: null } },
         { $sort: { created: -1 } },
         { $project: { '_id': 0, 'id': 1, 'name': 1, 'players': 1, 'protected': { $cond: [{ $eq: ['$password', null] }, false, true] } } },
         function (err, result) {
@@ -172,7 +172,14 @@ function logQuery(err, result){
     if (err)
         console.log("  query: error - " + JSON.stringify(err));
     if (result)
-        console.log("  query: result - " + JSON.stringify(err));
+        console.log("  query: result - " + JSON.stringify(result));
+}
+
+function sanatize(str) {
+    if (str == null) return null;
+    str = str.replace(/^\s+|\s+$/g, '');
+    if (str.replace(/\s/g, '').length < 1) return null;
+    return str;
 }
 
 module._crypto = require("crypto");
