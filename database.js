@@ -150,8 +150,9 @@ function saveGameEvent(request, content, callback) {
 function getGameEventsSince(request, content, callback) {
     console.log("->getGameEventsSince");
     logRequest(request, content);
+    var gameid = request.parameters.gameid;
     var version = request.parameters.version || 0;
-    getGame(request, content, function(err, result) {
+    module._games.findOne({ 'id': gameid }, { 'events': 1 }, function(err, result) {
         logQuery(err, result);
         if (err) {
             callback(err);

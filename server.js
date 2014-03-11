@@ -26,7 +26,7 @@ function run() {
     rest.post('/events/:gameid', database.saveGameEvent);
     rest.get('/proxy/:url', _get);
     
-    http.createServer(app).listen(8080);
+    http.createServer(app).listen(8000);
 }
 
 function _get(request, content, callback) {

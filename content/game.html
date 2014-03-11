@@ -58,5 +58,19 @@
     </div>
     
     </div>
+    
+    
+    <script type="text/html" id="templateCard">
+        <div class="col-xs-1 card">
+            <img src="{{img-url}}" />
+        </div>
+    </script>
+    
+    
+    <script type="text/javascript">
+        var anr = new netrunner(getParameterByName("gameid"), getParameterByName("playerid"));
+        anr.loadGame();
+        setTimeout(function() { anr.getNewEvents(); }, 2000);
+    </script>
     </body>
 </html>
