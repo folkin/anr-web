@@ -13,7 +13,8 @@ function createGame(request, content, callback) {
             'name': name, 
             'password': password,   
             'players': [], 
-            'events': [] 
+            'events': [] ,
+            'version': 0
         };
         module._games.insert(game, function(err, result) {
             logQuery(err, result);
@@ -134,7 +135,7 @@ function saveGameEvent(request, content, callback) {
     event.timestamp = new Date().toJSON();
     module._games.update(
         { id: gameid }, 
-        {'$push': { events: event }},
+        {'$push': { events: event }, '$inc': { version: 1 }},
         function(err, result) {
             logQuery(err, result);
             if (err) {
@@ -151,20 +152,21 @@ function getGameEventsSince(request, content, callback) {
     console.log("->getGameEventsSince");
     logRequest(request, content);
     var gameid = request.parameters.gameid;
-    var version = request.parameters.version || 0;
-    module._games.findOne({ 'id': gameid }, { 'events': 1 }, function(err, result) {
+    var version = parseInt(request.parameters.version) || 0;
+    module._games.findOne({ 'id': gameid }, { 'events': { '$slice' : [ version, 50 ] }, 'version' : 1 }, function(err, result) {
         logQuery(err, result);
         if (err) {
             callback(err);
         }
         else {
             var events = [];
-            var allevents = result.events || [];
-            var count = allevents.length;
-            for (var i = version; i < count; i++) {
-                events.push(allevents[i]);
+            var slice = result.events || [];
+            var count = slice.length;
+            for (var i = 0; i < count; i++) {
+                events.push(slice[i]);
             }
-            callback(null, { 'version': count, 'events': events });
+            version += count;
+            callback(null, { 'version': version, 'events': events, 'remaining': result.version - version });
         }
         console.log("<-getGameEventsSince");
     });

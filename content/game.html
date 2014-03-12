@@ -50,10 +50,16 @@
     
     <div class="row">
         <div class="col-xs-2 event-log">
-            events
+            <ul id="event-log">
+            </ul>
         </div>
         <div class="col-xs-10 chat-log">
-            chat messages
+            <ul id="chat-log">
+            </ul>
+            <div class="form-group">
+              <label class=" sr-only" for="chat-log-input">Chat</label>
+              <input class="form-control input-sm" type="text" id="chat-log-input" placeholder="chat text">
+            </div>
         </div>
     </div>
     
@@ -68,9 +74,8 @@
     
     
     <script type="text/javascript">
-        var anr = new netrunner(getParameterByName("gameid"), getParameterByName("playerid"));
+        var anr = new netrunner(getParameterByName("id"), getParameterByName("player"));
         anr.loadGame();
-        setTimeout(function() { anr.getNewEvents(); }, 2000);
     </script>
     </body>
 </html>
