@@ -1,16 +1,18 @@
 
 var netrunner = function (gameid, playerid) {
     this.game = {
-        "id": gameid, 
-        "playerid": playerid,
+        "id": gameid,
         "version": 0
+     };
+     this.player = {
+        "id": playerid,
      };
      
      this.init = function(g) {
         var me = this;
         $("#chat-log-input").on("keypress", function(e) {
             if (e.which == 13) {
-                me.saveEvent("anr.chat", $(this).val());
+                me.saveEvent("game.chat", $(this).val());
                 $(this).val("");
             }
         });
@@ -33,9 +35,9 @@ var netrunner = function (gameid, playerid) {
      
      this.processEvent = function(e) {
         switch (e.type) {
-            case "anr.error":
+            case "game.error":
                 break;
-            case "anr.chat":
+            case "game.chat":
                 $("#chat-log").append("<li>" + this.getPlayerName(e.player) + ": " + e.arg + "</li>");
                 break;
             case "anr.drawcard":
@@ -61,7 +63,7 @@ var netrunner = function (gameid, playerid) {
 
 netrunner.prototype.loadGame = function() {
     var me = this;
-    var url = "/api/game/" + this.game.id;
+    var url = "/api/game/" + this.game.id + "/" + this.player.id;
     $.ajax(url, {
         dataType: "json",
         success: function(data, status, xhr) {
@@ -83,7 +85,7 @@ netrunner.prototype.loadGame = function() {
 netrunner.prototype.getNewEvents = function() {
     var me = this;
     var version = this.game.version;
-    var url = "api/events/" + this.game.id + "/" + this.game.version;
+    var url = "api/events/" + this.game.id + "/" + this.player.id + "/" + this.game.version;
     $.ajax(url, {
         dataType: "json",
         success: function(data, status, xhr) {
@@ -91,7 +93,7 @@ netrunner.prototype.getNewEvents = function() {
             setTimeout(function() { me.getNewEvents(); }, 10000);
         },
         error: function(xhr, status, error) {
-            me.processEvent({ "type": "anr.error",  "arg": error });
+            me.processEvent({ "type": "game.error",  "arg": error });
             setTimeout(function() { me.getNewEvents(); }, 60000);
         }
      });
@@ -99,8 +101,8 @@ netrunner.prototype.getNewEvents = function() {
 
 netrunner.prototype.saveEvent = function(type, arg) {
     var me = this;
-    var url = "api/events/" + this.game.id;
-    var data = { "version": this.game.version, "event": { "player": this.game.playerid, "type": type, "arg": arg } };
+    var url = "api/events/" + this.game.id + "/" + this.player.id + "/" + type + "/" + this.game.version;
+    var data = arg;
     $.ajax(url, {
         type: "post",
         dataType: "json",
@@ -109,7 +111,7 @@ netrunner.prototype.saveEvent = function(type, arg) {
             me.processEventData(data);
         },
         error: function(xhr, status, error) {
-            me.processEvent({ "type": "anr.error",  "arg": error });
+            me.processEvent({ "type": "game.error",  "arg": error });
         }
     });
 }
