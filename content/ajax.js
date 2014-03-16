@@ -9,10 +9,10 @@ var netrunner = function (gameid, playerid) {
      };
      
      this.init = function(g) {
-        var me = this;
+        var self = this;
         $("#chat-log-input").on("keypress", function(e) {
             if (e.which == 13) {
-                me.saveEvent("game.chat", $(this).val());
+                self.saveEvent("game.chat", $(this).val());
                 $(this).val("");
             }
         });
@@ -43,7 +43,7 @@ var netrunner = function (gameid, playerid) {
             case "anr.drawcard":
                 break;
             default:
-                renderError("Unknown event received: " + JSON.stringify(e));
+                this.renderError("Unknown event received: " + JSON.stringify(e));
         }
         //$("#chat-log").append("<li>" + this.getPlayerName(e.player) + ": " + e.arg + "</li>");
     };
@@ -62,56 +62,61 @@ var netrunner = function (gameid, playerid) {
 }
 
 netrunner.prototype.loadGame = function() {
-    var me = this;
-    var url = "/api/game/" + this.game.id + "/" + this.player.id;
+    var self = this;
+    var url = "/api/game/" + this.game.id;
     $.ajax(url, {
         dataType: "json",
         success: function(data, status, xhr) {
-            $.extend(me.game, data);
-            me.game.events = me.game.events || [];            
-            me.init(me.game);
-            me.renderGame(me.game);
-            for(var i = 0; i < me.game.events.length; i++) {
-                me.processEvent(me.game.events[i]);
-            }
-            me.getNewEvents();
+            var version = self.game.version;
+            $.extend(self.game, data);
+            self.game.events = self.game.events || [];            
+            self.init(self.game);
+            self.renderGame(self.game);
+            self.game.version = version;
+            self.getNewEvents();
         },
         error: function(xhr, status, error) {
-            me.renderError(errror);
+            self.renderError(error);
         }
     });
 }
 
 netrunner.prototype.getNewEvents = function() {
-    var me = this;
+    var self = this;
     var version = this.game.version;
-    var url = "api/events/" + this.game.id + "/" + this.player.id + "/" + this.game.version;
+    var url = "api/event/" + this.game.id + "/" + this.game.version;
     $.ajax(url, {
         dataType: "json",
         success: function(data, status, xhr) {
-            me.processEventData(data);
-            setTimeout(function() { me.getNewEvents(); }, 10000);
+            self.processEventData(data);
+            setTimeout(function() { self.getNewEvents(); }, 10000);
         },
         error: function(xhr, status, error) {
-            me.processEvent({ "type": "game.error",  "arg": error });
-            setTimeout(function() { me.getNewEvents(); }, 60000);
+            self.processEvent({ "type": "game.error",  "arg": error });
+            setTimeout(function() { self.getNewEvents(); }, 60000);
         }
      });
 }
 
 netrunner.prototype.saveEvent = function(type, arg) {
-    var me = this;
-    var url = "api/events/" + this.game.id + "/" + this.player.id + "/" + type + "/" + this.game.version;
-    var data = arg;
+    var self = this;
+    var url = "api/event/";
+    var data = {
+        "gameid": this.game.id,
+        "playerid": this.player.id,
+        "type": type,
+        "arg": arg,
+        "version": this.game.version
+    };
     $.ajax(url, {
         type: "post",
         dataType: "json",
         data: data,
         success: function(data, status, xhr) {
-            me.processEventData(data);
+            self.processEventData(data);
         },
         error: function(xhr, status, error) {
-            me.processEvent({ "type": "game.error",  "arg": error });
+            self.processEvent({ "type": "game.error",  "arg": error });
         }
     });
 }

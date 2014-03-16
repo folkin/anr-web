@@ -1,0 +1,39 @@
+<strong><a href='http://netrunner.meteor.com/decks/7tmzjjrfwKdQbD8aY'>Kinky Linky Kate</a></strong> (45 cards)
+
+<a href='http://netrunner.meteor.com/card/kate-mac-mccaffrey-core'>Kate "Mac" McCaffrey: Digital Tinker</a> 
+
+<h6>Event (10)</h6>
+1 <a href='http://netrunner.meteor.com/card/blackmail-fear-and-loathing'>Blackmail</a> 
+1 <a href='http://netrunner.meteor.com/card/levy-ar-lab-access-creation-and-control'>Levy AR Lab Access</a> 
+3 <a href='http://netrunner.meteor.com/card/modded-core'>Modded</a> 
+3 <a href='http://netrunner.meteor.com/card/sure-gamble-core'>Sure Gamble</a> 
+2 <a href='http://netrunner.meteor.com/card/the-makers-eye-core'>The Maker's Eye</a> 
+
+<h6>Hardware (12)</h6>
+3 <a href='http://netrunner.meteor.com/card/clone-chip-creation-and-control'>Clone Chip</a> 
+2 <a href='http://netrunner.meteor.com/card/grimoire-core'>Grimoire</a> <span style='color: #cf3713'>&bull;&bull;&bull;&bull;</span>
+2 <a href='http://netrunner.meteor.com/card/plascrete-carapace-what-lies-ahead'>Plascrete Carapace</a> 
+3 <a href='http://netrunner.meteor.com/card/r-d-interface-future-proof'>R&D Interface</a> 
+2 <a href='http://netrunner.meteor.com/card/rabbit-hole-core'>Rabbit Hole</a> 
+
+<h6>Resource (10)</h6>
+1 <a href='http://netrunner.meteor.com/card/john-masanori-opening-moves'>John Masanori</a> 
+2 <a href='http://netrunner.meteor.com/card/kati-jones-humanitys-shadow'>Kati Jones</a> 
+2 <a href='http://netrunner.meteor.com/card/personal-workshop-cyber-exodus'>Personal Workshop</a> 
+3 <a href='http://netrunner.meteor.com/card/professional-contacts-creation-and-control'>Professional Contacts</a> 
+2 <a href='http://netrunner.meteor.com/card/underworld-contact-a-study-in-static'>Underworld Contact</a> 
+
+<h6>Icebreaker (6)</h6>
+1 <a href='http://netrunner.meteor.com/card/atman-creation-and-control'>Atman</a> 
+1 <a href='http://netrunner.meteor.com/card/corroder-core'>Corroder</a> <span style='color: #cf3713'>&bull;&bull;</span>
+1 <a href='http://netrunner.meteor.com/card/deus-x-a-study-in-static'>Deus X</a> 
+1 <a href='http://netrunner.meteor.com/card/femme-fatale-core'>Femme Fatale</a> <span style='color: #444f80'>&bull;</span>
+1 <a href='http://netrunner.meteor.com/card/wyrm-core'>Wyrm</a> <span style='color: #cf3713'>&bull;&bull;</span>
+1 <a href='http://netrunner.meteor.com/card/zu-13-key-master-what-lies-ahead'>ZU.13 Key Master</a> 
+
+<h6>Program (7)</h6>
+2 <a href='http://netrunner.meteor.com/card/datasucker-core'>Datasucker</a> <span style='color: #cf3713'>&bull;&bull;</span>
+2 <a href='http://netrunner.meteor.com/card/parasite-core'>Parasite</a> <span style='color: #cf3713'>&bull;&bull;&bull;&bull;</span>
+3 <a href='http://netrunner.meteor.com/card/self-modifying-code-creation-and-control'>Self-modifying Code</a> 
+
+Built with <a href='http://netrunner.meteor.com/decks/7tmzjjrfwKdQbD8aY'>http://netrunner.meteor.com/</a>

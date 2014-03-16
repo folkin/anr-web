@@ -1,82 +1,62 @@
-var http = require('http');
-var connect = require('connect');
-var rest = require('connect-rest');
-var _database = require('./database.js');
-var _random = require('./random.js');
+var _restify = require('restify');
+var _log = require('bunyan');
 
 function run() {
-    var options = {
-        context: '/api',
-        logger: new NullLogger()
-    };
-    var app = connect()
-        .use(connect.static(__dirname + '/content'))
-        .use(connect.query())
-        .use(connect.urlencoded())
-        .use(connect.json({ strict: false }))
-        .use(connect.logger('dev'))
-        .use(rest.rester(options));
-        
-    rest.get('/games/list', _database.listGames);
-    rest.post('/games/create', _database.createGame);
-    rest.post('/game/:gameid/join', _database.joinGame);
-    rest.get('/game/:gameid/:playerid', _database.getGame);
-    rest.post('/game/:gameid/:playerid/end', _database.endGame);
-    rest.post('/game/:gameid/:playerid/delete', _database.deleteGame);
-    rest.get('/events/:gameid/:playerid/?version', _database.getGameEventsSince);
-    rest.post('/events/:gameid/:playerid/:type/?version', _database.saveGameEvent);
-    rest.get('/random/?len', random);
-    //rest.get('/proxy/:url', _get);
+
+    var log = new _log({
+        'name': 'anr-web',
+        'stream': process.stdout,
+        'level': 'debug'
+    });
     
-    http.createServer(app).listen(8000);
+    var server = _restify.createServer({
+        'name': 'anr-web',
+        'log': log
+     });
+     
+     var Game = require('./database');
+     var game = new Game({ log: log });
+     
+    server.pre(_restify.pre.sanitizePath());
+    server.use(_restify.acceptParser(server.acceptable));
+    server.use(_restify.queryParser());
+    server.use(_restify.bodyParser());
+     
+    server.get('/api/game', function(req, res, next) { _wrap(req, res, next, game, 'getGames'); });
+    server.get('/api/game/:gameid', function(req, res, next) { _wrap(req, res, next, game, 'getGame'); });
+    server.post('/api/game', function(req, res, next) { _wrap(req, res, next, game, 'createGame'); });
+    server.del('/api/game/:gameid', function(req, res, next) { _wrap(req, res, next, game, 'deleteGame'); });
+    server.put('/api/game/:gameid', function(req, res, next) { _wrap(req, res, next, game, 'updateGame'); });
+    
+    server.post('/api/player', function(req, res, next) { _wrap(req, res, next, game, 'createPlayer'); });
+    server.del('/api/player', function(req, res, next) { _wrap(req, res, next, game, 'deletePlayer'); });
+    
+    server.get('/api/event/:gameid/:version', function(req, res, next) { _wrap(req, res, next, game, 'getEvents'); });
+    server.post('/api/event', function(req, res, next) { _wrap(req, res, next, game, 'createEvent'); });
+    
+    server.get(/\/[^.]+\.[chjmlst]{2,4}/, _restify.serveStatic({
+        'directory': './content',
+        'default': 'setup.html'
+    }));
+    
+    console.log(server.toString());
+    
+    server.listen(8000);
 }
 
-function random(request, content, callback) {
-    var len = request.parameters.len;
-    if (len == null)
-        len = "8";
-    try {
-        length = parseInt(len);
-    }
-    catch (err)
-    {
-        callback(err);
-    }
-    if (length > 1024)
-        length = 1024;
-    
-    _random.randomString(length, callback);
+function _wrap(req, res, next, game, func) {
+    req.log.debug({req: { path: req.path(), method: req.method, params: req.params }}, "->" + func);
+    game[func](req.params, function (error, result) {
+        if (error) {
+            req.log.error({err: error}, "<-" + func);
+            next(error);
+        }
+        else {
+            res.send(200, result);
+            res.log.debug({res: { code: res.code, content: result }}, "<-" + func);
+            next();
+        }
+    });
 }
-
-//function _get(request, content, callback) {
-//    var http = require('http');
-//    var $url = require('url').parse(unescape(request.parameters.url));
-//
-//    console.log('-> GET ' + $url.hostname + ':' + ($url.port || '80') + $url.path);
-//    http.request({
-//            host: $url.hostname,
-//            port: $url.port || '80',
-//            path: $url.path
-//        },    
-//        function(res) {
-//            var data = '';
-//            res.on('data', function (chunk) {
-//                data += chunk;
-//            });
-//            res.on('error', function(error) {
-//                callback(error);
-//            });
-//            res.on('end', function () {
-//                callback(null, data);
-//            });
-//        }
-//    ).end();
-//}
-
-
-function NullLogger(){ }
-NullLogger.prototype.info = function() { };
-NullLogger.prototype.debug = function() { };
-NullLogger.prototype.error = function() { };
 
 run();

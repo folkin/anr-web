@@ -164,7 +164,7 @@
         }
     
         function listGames() {
-            $.ajax("api/games", {
+            $.ajax("api/game", {
                 dataType: "json",
                 success: function(data, status, xhr) {
                     renderGames(data);
@@ -188,12 +188,12 @@
             
             $("#new-game-modal").modal("hide");
             
-            $.ajax("api/games/create", {
+            $.ajax("api/game", {
                 dataType: "json",
                 type: "post",
                 data: data,
                 success: function(data, status, xhr) {
-                    renderGames(data);
+                    listGames();
                 },
                 error: function(xhr, status, error) {
                     renderError(errror);
@@ -213,9 +213,10 @@
         function joinGame() {
             var gameid = $("#join-game-id").val();
             var data = { 
+                "gameid": gameid,
+                "password": $("#join-game-password").val(),
                 "name": $("#join-game-name").val(), 
                 "player": $("#join-game-player").val(),
-                "password": $("#join-game-password").val()
             };
             var deckhtml = $("#join-game-deck").val();
             
@@ -231,7 +232,7 @@
             
             $("#join-game-modal").modal("hide");
             
-            $.ajax("api/game/" + gameid + "/join", {
+            $.ajax("api/player/", {
                 dataType: "json",
                 type: "post",
                 data: data,
