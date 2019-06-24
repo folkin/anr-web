@@ -1,4 +1,4 @@
-
+﻿
 var netrunner = function (gameid, playerid) {
     this.game = {
         "id": gameid,

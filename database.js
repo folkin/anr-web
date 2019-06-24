@@ -1,4 +1,4 @@
-var mongo = require('mongoskin');
+﻿var mongo = require('mongoskin');
 var crypto = require('crypto');
 
 function sanatize(str) {
